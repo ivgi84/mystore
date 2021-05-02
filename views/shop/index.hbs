@@ -17,7 +17,7 @@
                             <p class="product__description">{{this.description}}</p>
                         </div>
                         <div class="card__actions">
-                            <button class="btn">Add to Cart</button>
+                            {{> addToCart product=this}}
                         </div>
                     </article>
                 {{/each}}

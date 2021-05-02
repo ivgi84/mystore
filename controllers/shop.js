@@ -29,10 +29,18 @@ exports.getProducts = (req, res, next) => {
 
 exports.getCart = (req, res, next) => {
     res.render('shop/cart', {
-        pageTitle: 'Your Cart', 
+        pageTitle: 'Your Cart',
         path: '/cart', 
         activeCart: true
     })
+};
+
+exports.postCart = (req, res, next) => {
+    const prodId = req.body.productID;
+    console.log('prodID: ', prodId);
+    res.render('shop/cart', {
+        pageTitle: 'Cart'
+    });
 };
 
 exports.getCheckout = (req, res, next) => {
@@ -55,6 +63,11 @@ exports.getProduct = (req, res, next) => {
     const prodId = req.params.productId;
     Product.findById(prodId).then((product) => {
         console.log(product);
-    })
+        res.render('shop/product-detail', {
+            pageTitle: product.title,
+            productCSS: true,
+            product
+        });
+    });
 };
 

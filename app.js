@@ -9,7 +9,8 @@ const app = express();
 app.engine('hbs', expressHbs({
     extname: 'hbs',
     defaultLayout: 'main-layout',
-    layoutsDir: 'views/layouts'
+    layoutsDir: 'views/layouts',
+    partialsDir: 'views/partials' // partials is a default folder, but writing it to be explicetly configured
 })); //we need to say to express that this is the engine
 app.set('view engine','hbs') //configure a template engine 
 app.set('views', 'views') //by default views prop goes to views folder, but here it configured explicitly

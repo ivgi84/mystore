@@ -1,1 +1,13 @@
-<h1>PRODUCT Detils</h1>
+  <main class="centered">
+    <h1>{{product.title}}</h1>
+    <hr>
+    <div>
+      <img src="{{product.imageUrl}}" alt="">
+    </div>
+    <h2>{{product.price}}</h2>
+    <p>{{product.description}}</p>
+    {{> addToCart product=product}}
+  </main>
+
+
+  {{!-- {{> addToCart product=product}} this is partial, product=product is data binding --}}

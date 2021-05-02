@@ -2,7 +2,7 @@ const path = require('path');;
 const fs = require('fs');
 
 const p = path.join(
-    path.dirname(process.mainModule.filename),
+    path.dirname(require.main.filename),
     'data',
     'products.json');
 
@@ -46,7 +46,7 @@ module.exports = class Product {
     }
     
     static fetchAll() {
-        return getProductsFromFile()
+        return getProductsFromFile();
     }
 
     static findById(id) {
