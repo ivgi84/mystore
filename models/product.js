@@ -17,11 +17,25 @@ const getProductsFromFile = () => {
     });
 }
 
+const saveProductsToFile = (products) => {
+    return new Promise((resolve, reject) => {
+        fs.writeFile(p, JSON.stringify(products), (err) => {
+            if(err){
+                console.log(err);
+                reject(err)
+                return;
+            }
+            resolve(true)
+        });
+    });
+}
+
 module.exports = class Product {
 
-    constructor(title, imageUrl, description, price) {
+    constructor(id, title, imageUrl, description, price) {
+        this.id = id;
         this.title = title;
-        this.imgSrc = 'https://picsum.photos/' + Math.floor(Math.random()*1000);
+        this.imgSrc = imageUrl? imageUrl : 'https://picsum.photos/' + Math.floor(Math.random()*1000);
         this.imageUrl = imageUrl;
         this.description = description;
         this.price = price;
@@ -29,18 +43,23 @@ module.exports = class Product {
 
     save() {
         return new Promise((resolve, reject) => {
-            this.id = Math.floor(Math.random()*10e16).toString();
+            
             getProductsFromFile().then((products) => {
-                products.push(this);
-                fs.writeFile(p, JSON.stringify(products), (err) => {
-                    if(err){
-                        console.log(err);
-                        reject(err)
-                        return;
-                    }
-                    console.log('SAVED');
-                    resolve(true)
-                });
+                debugger
+                if(this.id) {
+                    const existingProductIndex = products.findIndex(product => product.id === this.id);
+                    const updatedProducts = [...products];
+                    updatedProducts[existingProductIndex] = this;
+
+                   saveProductsToFile(updatedProducts).then(() => resolve()).catch(err => reject(err));
+
+                }
+                else {
+                    this.id = Math.floor(Math.random()*10e16).toString();
+                    products.push(this);
+
+                    saveProductsToFile(products).then(() => resolve()).catch(err => reject(err));
+                }
             })
         });
     }
