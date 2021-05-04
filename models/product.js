@@ -1,34 +1,12 @@
 const path = require('path');;
-const fs = require('fs');
+const utils = require('../utils/path');
 
-const p = path.join(
+const Cart = require('./cart');
+
+const productsFile = path.join(
     path.dirname(require.main.filename),
     'data',
     'products.json');
-
-const getProductsFromFile = () => {
-    return new Promise((resolve)=> {
-        fs.readFile(p, (err, content)=> {
-            if(err){
-                return resolve([])
-            }
-            resolve(JSON.parse(content))
-        });
-    });
-}
-
-const saveProductsToFile = (products) => {
-    return new Promise((resolve, reject) => {
-        fs.writeFile(p, JSON.stringify(products), (err) => {
-            if(err){
-                console.log(err);
-                reject(err)
-                return;
-            }
-            resolve(true)
-        });
-    });
-}
 
 module.exports = class Product {
 
@@ -41,38 +19,50 @@ module.exports = class Product {
         this.price = price;
     }
 
+    static fetchAll() {
+        return utils.getProductsFromFile(productsFile);
+    }
+
+    static findById(id) {
+        return utils.getProductsFromFile(productsFile).then((products) => {
+            const product = products.find(p => p.id === id);
+            return product;
+        });
+    }
+
+    static deleteById(id) {
+        return utils.getProductsFromFile(productsFile).then((products) => {
+            const product = products.find(prod => prod.id === id);
+            const updatedProducts = products.filter(product => product.id !== id);
+            return utils.saveProductsToFile(updatedProducts, productsFile).then(() => {
+                Cart.deleteProduct(id, product.price);
+            });
+
+        });
+    }
+
     save() {
         return new Promise((resolve, reject) => {
             
-            getProductsFromFile().then((products) => {
-                debugger
+            utils.getProductsFromFile(productsFile).then((products) => {
                 if(this.id) {
                     const existingProductIndex = products.findIndex(product => product.id === this.id);
                     const updatedProducts = [...products];
                     updatedProducts[existingProductIndex] = this;
 
-                   saveProductsToFile(updatedProducts).then(() => resolve()).catch(err => reject(err));
+                    utils.saveProductsToFile(updatedProducts, productsFile).then(() => resolve()).catch(err => reject(err));
 
                 }
                 else {
                     this.id = Math.floor(Math.random()*10e16).toString();
                     products.push(this);
 
-                    saveProductsToFile(products).then(() => resolve()).catch(err => reject(err));
+                    utils.saveProductsToFile(products, productsFile).then(() => resolve()).catch(err => reject(err));
                 }
             })
         });
     }
     
-    static fetchAll() {
-        return getProductsFromFile();
-    }
-
-    static findById(id) {
-        return getProductsFromFile().then((products) => {
-            const product = products.find(p => p.id === id);
-            return product;
-        });
-    }
+ 
 
 }
