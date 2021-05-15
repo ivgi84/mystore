@@ -1,8 +1,11 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const path = require('path');
+const bodyParser = require('body-parser');
+
 const expressHbs = require('express-handlebars');
 const routeErrorCtrl = require('./controllers/route-error');
+
+const db = require('./utils/db');
 
 const app = express();
 
@@ -17,6 +20,11 @@ app.set('views', 'views') //by default views prop goes to views folder, but here
 
 const adminRoutes = require('./router/admin');
 const shopRoutes = require('./router/shop');
+
+//example
+// db.execute('SELECT * FROM products').then((data) => {
+//     console.log(data[0]);
+// })
 
 app.use(bodyParser.urlencoded({extended: false})); //this will parse post request and the result we'll get in req.body
 app.use(express.static(path.join(__dirname, 'public')));
