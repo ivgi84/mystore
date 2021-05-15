@@ -6,11 +6,11 @@ const fs = require('fs');
 
 exports.getProductsFromFile = (filePath) => {
   return new Promise((resolve)=> {
-      fs.readFile(filePath, (err, content)=> {
+      fs.readFile(filePath, (err, content) => {
           if(err){
               return resolve([]);
           }
-          resolve(JSON.parse(content))
+          resolve(JSON.parse(content));
       });
   });
 }

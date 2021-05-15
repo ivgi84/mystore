@@ -1,5 +1,5 @@
 const path = require('path');;
-const utils = require('../utils/path');
+const utils = require('../utils/helper');
 
 const Cart = require('./cart');
 
