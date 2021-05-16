@@ -2,30 +2,46 @@ const Product = require('../models/product');
 const Cart = require('../models/cart');
 
 exports.getIndex = (req, res, next) => {
-    Product.fetchAll().then(([rows, fieldData]) => {
+    Product.findAll({raw: true}).then(products => {
         res.render('shop/index', {
             pageTitle: 'Shop', 
-            prods: rows, 
+            prods: products, 
             path: '/', 
-            hasProducts: rows.length > 0,
+            hasProducts: products.length > 0,
             activeShop: true,
             productCSS: true
         })
-    }).catch((err) => { console.error(err)});;
+    }).catch(err => { console.error(err) });
 };
 
 exports.getProducts = (req, res, next) => {
     //res.sendFile(path.join(rootDir, 'views', 'shop.html')); //old way
-    Product.fetchAll().then(([rows, fieldData]) => { // distraction
+    Product.findAll({raw: true}).then(products => {
         res.render('shop/product-list', {
             pageTitle: 'All products', 
-            prods: rows, 
+            prods: products, 
             path: '/products', 
-            hasProducts: rows.length > 0,
+            hasProducts: products.length > 0,
             activeProducts: true,
             productCSS: true
         })
     }).catch((err) => { console.error(err)});
+};
+
+exports.getProduct = (req, res, next) => {
+    const prodId = req.params.productId;
+    //****alternative approach
+    //Product.findAll({where: {id: prodId}}).then(products).catch()//result here is an array
+    //alternative approach ******
+    
+    Product.findByPk(prodId).then((product) => {
+        console.log(product)
+        res.render('shop/product-detail', {
+            pageTitle: product.title,
+            productCSS: true,
+            product: product
+        });
+    }).catch((err) => console.error(err));    
 };
 
 exports.getCart = (req, res, next) => {
@@ -86,16 +102,5 @@ exports.getOrders = (req, res, next) => {
     })
 };
 
-exports.getProduct = (req, res, next) => {
-    const prodId = req.params.productId;
-    Product.findById(prodId).then(([product]) => {
-        console.log(product);
-        res.render('shop/product-detail', {
-            pageTitle: product.title,
-            productCSS: true,
-            product: product[0]
-        });
-    }).catch((err) => console.error(err));
-      
-};
+
 

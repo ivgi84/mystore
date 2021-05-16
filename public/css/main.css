@@ -19,6 +19,14 @@ form {
   display: inline;
 }
 
+.img{
+  max-height: 50rem;
+}
+
+.img img{
+  height: 100%;
+}
+
 .main-header {
   width: 100%;
   height: 3.5rem;

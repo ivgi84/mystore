@@ -2,6 +2,7 @@ const Sequelize = require('sequelize');
 
 const sequelize = require('../utils/db');
 
+//model of object for db
 const Product = sequelize.define('product', {
     id: {
         type: Sequelize.INTEGER,
