@@ -10,6 +10,8 @@ const Product = require('./models/product');
 const User = require('./models/user');
 const Cart = require('./models/cart');
 const CartItem = require('./models/cart-item');
+const Order = require('./models/order');
+const OrderItem = require('./models/order-item');
 
 const app = express();
 
@@ -50,20 +52,24 @@ User.hasMany(Product);
 User.hasOne(Cart);
 Cart.belongsTo(User);
 Cart.belongsToMany(Product, { through: CartItem });
-Product.belongsToMany(Cart, { through: CartItem })
+Product.belongsToMany(Cart, { through: CartItem });
+Order.belongsTo(User);
+User.hasMany(Order);
+Order.belongsToMany(Product, { through: OrderItem});
 
 sequelize
-.sync({force: true}) //is only for DEVELOPMENT as it will force refresh db setting new accisiations
-//.sync()
+//.sync({force: true}) //is only for DEVELOPMENT as it will force refresh db setting new accisiations
+.sync()
 .then(() => { //sync all models and creates tables if not exists
-    User.findByPk(1).then(user => {
+    User.findByPk(1)
+    .then(user => {
         if(!user) {
             return User.create({name: 'Evgeny', email: 'asd@asd.com'})
         }
         return Promise.resolve(user);
     })
-    .then(user => {
-        //console.log('User', user);
+    //.then(user => user.createCart() )
+    .then(cart => {
         app.listen(3000, () => {
             console.log('Listening on port 3000');
         }); 
