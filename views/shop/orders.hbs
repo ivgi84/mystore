@@ -4,12 +4,12 @@
           <ul>
             {{#each orders}}
             <li class="order-item card">
-              <p><b>{{ this.id }}</b></p>
+              <p><b>{{ this._id }}</b></p>
               <ul>
-                {{#each this.products}}
+                {{#each this.items}}
                   <li>
                     <p>Name: <b>{{this.title}}</b>  
-                      <span>Quantity: <b>{{this.orderItem.quantity}}</b></span>
+                      <span>Quantity: <b>{{this.quantity}}</b></span>
                     </p>
                   </li>
                 {{/each}}
