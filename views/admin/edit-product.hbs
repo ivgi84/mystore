@@ -17,7 +17,7 @@
             <textarea name="description" id="description" cols="30" rows="5">{{ product.description }}</textarea>
         </div>
         {{#if editing }}
-            <input type="hidden" name="productID" value="{{ product.id }}">
+            <input type="hidden" name="productID" value="{{ product._id }}">
             <button class="btn" type="submit">Update Product</button>
         {{else}}
             <button class="btn" type="submit">Add Product</button>

@@ -17,32 +17,17 @@ exports.postAddProduct = (req, res, next) => {
     const price = req.body.price;
     const description = req.body.description;
 
-    //createProduct method that was created dynamycly, because we associated user with product
-    req.user.createProduct({ 
-        title,
-        price,
-        imageUrl,
-        description
-    }).then(result => {
+    const product = new Product(title, price, description, imageUrl, null, req.user._id);
+    product.save()
+    .then(result => {
         res.redirect('/admin/products');
     }).catch(err => console.error(err)) 
 
-    // another option of doing the same
-    // Product.create({ //create and saves the new object ot db
-    //     title,
-    //     price,
-    //     imageUrl,
-    //     description,
-    //     UserId: req.user.id //adding userID as we need it for association
-    // }).then(result => {
-    //     res.redirect('/admin/products');
-    // }).catch(err => console.error(err)) 
 };
 
 exports.getAllAdminProducts = (req, res, next) => {
 
-    //usage of model to get associated data
-    req.user.getProducts()
+    Product.fetchAll()
     .then(products => {
         res.render('admin/products', {
             pageTitle: 'Admin - All products', 
@@ -66,9 +51,8 @@ exports.getEditProduct = (req, res, next) => {
     }
     const prodID = req.params.productId;
 
-    //usage of model to get it's associated data
-    req.user.getProducts({where: {id: prodID}}).then(products => {
-        const product = products[0];
+    Product.findById(prodID)
+    .then(product => {
         if(!product){
             res.redirect('/');
         }
@@ -93,14 +77,9 @@ exports.postEditProduct = (req, res, next) => {
     const price = req.body.price;
     const imageUrl = req.body.imageUrl;
     const description = req.body.description;
+    const product = new Product(title, price, description, imageUrl, prodID);
 
-    Product.findByPk(prodID).then(product => {
-        product.title = title;
-        product.price = price;
-        product.imageUrl = imageUrl;
-        product.description = description;
-        return product.save();
-    })
+    product.save()
     .then(result => console.log('UPDATED PRODUCT'))
     .catch(err => console.error(err))
     .finally(()=> {
@@ -110,10 +89,8 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
     const prodId = req.body.productID;
-    Product.findByPk(prodId).then(product => {
-        return product.destroy(); //delte item
-    })
-    .then(result => console.log('Product Deleted'))
+    Product.deleteById(prodId)
+    .then(() => console.log('Product Deleted'))
     .catch(err => console.error(err))
     .finally(()=> res.redirect('/admin/products'))
 }
