@@ -5,10 +5,10 @@ const router = express.Router();
 //full url for this is /admin/add-product, => GET request
 router.get('/add-product', adminCtrl.getAddProduct);
 
-//full url for this is /admin/add-product, => POST request
+// //full url for this is /admin/add-product, => POST request
 router.post('/add-product', adminCtrl.postAddProduct);
 
-//admin/products
+// //admin/products
 router.get('/products', adminCtrl.getAllAdminProducts);
 
 router.get('/edit-product/:productId', adminCtrl.getEditProduct);

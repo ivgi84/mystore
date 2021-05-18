@@ -17,8 +17,15 @@ exports.postAddProduct = (req, res, next) => {
     const price = req.body.price;
     const description = req.body.description;
 
-    const product = new Product(title, price, description, imageUrl, null, req.user._id);
-    product.save()
+    const product = new Product({
+        title: title, 
+        price: price, 
+        description: description, 
+        imageUrl: imageUrl,
+        userId: req.user// mongoose will take the _id by itself
+    });
+    product
+    .save()//this is mongoose method now
     .then(result => {
         res.redirect('/admin/products');
     }).catch(err => console.error(err)) 
@@ -27,8 +34,11 @@ exports.postAddProduct = (req, res, next) => {
 
 exports.getAllAdminProducts = (req, res, next) => {
 
-    Product.fetchAll()
+    Product.find()
+    //.select('title')//allow to select what data should be retreived from the db
+   // .populate('userId','name')// allowes get all data according to property, second param allow to choose what data to get
     .then(products => {
+        console.log(products);
         res.render('admin/products', {
             pageTitle: 'Admin - All products', 
             prods: products, 
@@ -77,9 +87,15 @@ exports.postEditProduct = (req, res, next) => {
     const price = req.body.price;
     const imageUrl = req.body.imageUrl;
     const description = req.body.description;
-    const product = new Product(title, price, description, imageUrl, prodID);
 
-    product.save()
+    //first we get object from db, then updating it's data and the call save method which is mongoose method now in order to update product
+    Product.findById(prodID).then(product => {
+        product.title = title;
+        product.price = price;
+        product.description = description
+        product.imageUrl = imageUrl;
+        return product.save()
+    })
     .then(result => console.log('UPDATED PRODUCT'))
     .catch(err => console.error(err))
     .finally(()=> {
@@ -89,7 +105,7 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
     const prodId = req.body.productID;
-    Product.deleteById(prodId)
+    Product.findByIdAndRemove(prodId)
     .then(() => console.log('Product Deleted'))
     .catch(err => console.error(err))
     .finally(()=> res.redirect('/admin/products'))

@@ -6,9 +6,9 @@
             <li class="order-item card">
               <p><b>{{ this._id }}</b></p>
               <ul>
-                {{#each this.items}}
+                {{#each this.products}}
                   <li>
-                    <p>Name: <b>{{this.title}}</b>  
+                    <p>Name: <b>{{this.product.title}}</b>  
                       <span>Quantity: <b>{{this.quantity}}</b></span>
                     </p>
                   </li>
