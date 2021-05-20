@@ -3,6 +3,7 @@ const Product = require('../models/product');
 
 exports.getAddProduct = (req, res, next) => {
     res.render('admin/edit-product', {
+        isLoggedIn: req.session.isLoggedIn,
         pageTitle: 'Add Product',
         activeAddProduct: true,
         productCSS: true,
@@ -40,6 +41,7 @@ exports.getAllAdminProducts = (req, res, next) => {
     .then(products => {
         console.log(products);
         res.render('admin/products', {
+            isLoggedIn: req.session.isLoggedIn,
             pageTitle: 'Admin - All products', 
             prods: products, 
             path: 'admin/products', 
@@ -67,6 +69,7 @@ exports.getEditProduct = (req, res, next) => {
             res.redirect('/');
         }
         res.render('admin/edit-product', {
+            isLoggedIn: req.session.isLoggedIn,
             pageTitle: 'Admin - edit Product', 
             path: 'admin/edit-product',
             product: product,
