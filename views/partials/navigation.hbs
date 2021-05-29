@@ -14,11 +14,15 @@
   <ul class="main-header__item-list">
     <li class="main-header__item">
       <a class="{{#if activeLogin}}active{{/if}}" href="/login">Login</a>
+      <a class="{{#if activeSignup}}active{{/if}}" href="/signup">Signup</a>
     </li>
+    {{#if isLoggedIn}}
     <li class="main-header__item">
       <form action="/logout">
+        <input type="hidden" value="{{csrfToken}}" name="_csrf">
         <button class="" type="submit">Logout</button>
       </form>
     </li>
+    {{/if}}
   </ul>
 </nav>

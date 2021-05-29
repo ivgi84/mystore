@@ -1,8 +1,5 @@
 <main>
-    <div class="error">
-        {{errorMessage}}
-    </div>
-    <form class="login-form" action="/login" method="POST">
+    <form class="login-form" action="/signup" method="POST">
         <div class="form-control">
             <label for="email">Email</label>
             <input type="email" name="email" id="email" value="">
@@ -10,8 +7,12 @@
         <div class="form-control">
             <label for="password">Password</label>
             <input type="password" name="password" id="password" value="">
+        </div>
+        <div class="form-control">
+            <label for="repeatPassword">Repeat Password</label>
+            <input type="password" name="repeatPassword" id="repeatPassword" value="">
             <input type="hidden" value="{{csrfToken}}" name="_csrf">
-        </div>        
-          <button class="btn" type="submit">Login</button>
+        </div>
+          <button class="btn" type="submit">Signup</button>
     </form>
 </main>

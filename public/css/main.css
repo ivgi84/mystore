@@ -60,6 +60,7 @@ form {
 .main-header__item a {
   text-decoration: none;
   color: white;
+  padding: 0 10px;
 }
 
 .main-header__item a:hover,

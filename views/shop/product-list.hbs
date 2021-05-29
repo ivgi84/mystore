@@ -15,7 +15,7 @@
                         </div>
                         <div class="card__actions">
                             <a href="/products/{{this._id}}" class="btn">Details</a>
-                            {{> addToCart product=this}}
+                            {{> addToCart csrfToken=../csrfToken product=this}}
                         </div>
                     </article>
                 {{/each}}

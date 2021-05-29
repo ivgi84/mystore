@@ -17,7 +17,7 @@
                             <p class="product__description">{{this.description}}</p>
                         </div>
                         <div class="card__actions">
-                            {{> addToCart product=this}}
+                            {{> addToCart csrfToken=../csrfToken product=this}}
                         </div>
                     </article>
                 {{/each}}

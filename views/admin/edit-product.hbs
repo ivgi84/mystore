@@ -16,6 +16,7 @@
             <label for="description">description</label>
             <textarea name="description" id="description" cols="30" rows="5">{{ product.description }}</textarea>
         </div>
+        <input type="hidden" value="{{csrfToken}}" name="_csrf">
         {{#if editing }}
             <input type="hidden" name="productID" value="{{ product._id }}">
             <button class="btn" type="submit">Update Product</button>

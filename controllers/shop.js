@@ -6,13 +6,13 @@ exports.getIndex = (req, res, next) => {
     Product.find() //mongoose method
     .then(products => {
         res.render('shop/index', {
-            isLoggedIn: req.session.isLoggedIn,
             pageTitle: 'Shop', 
             prods: products, 
             path: '/', 
             hasProducts: products.length > 0,
             activeShop: true,
-            productCSS: true
+            productCSS: true,
+            csrfToken: req.csrfToken()
         })
     }).catch(err => { console.error(err) });
 };
@@ -24,7 +24,6 @@ exports.getProducts = (req, res, next) => {
     Product.find() 
     .then(products => {
         res.render('shop/product-list', {
-            isLoggedIn: req.session.isLoggedIn,
             pageTitle: 'All products', 
             prods: products, 
             path: '/products', 
@@ -41,7 +40,6 @@ exports.getProduct = (req, res, next) => {
     .then((product) => {
         console.log('getProduct: ', product);
         res.render('shop/product-detail', {
-            isLoggedIn: req.session.isLoggedIn,
             pageTitle: product.title,
             productCSS: true,
             product: product
@@ -57,7 +55,6 @@ exports.getCart = (req, res, next) => {
         //console.log('CART PRODS: ', products)
         const products = user.cart.items;
         res.render('shop/cart', {
-            isLoggedIn: req.session.isLoggedIn,
             pageTitle: 'Your Cart',
             path: '/cart', 
             activeCart: true,
@@ -102,7 +99,7 @@ exports.postOrder = (req, res, next) => {
 
         const order = new Order({
             user: {
-                name: req.user.name,
+                email: req.user.email,
                 userId: req.user
             },
             products: products
@@ -122,7 +119,6 @@ exports.getOrders = (req, res, next) => {
     .then(orders => {
         console.log('orders', orders);
         res.render('shop/orders', {
-            isLoggedIn: req.session.isLoggedIn,
             pageTitle: 'Your Orders', 
             path: '/shop/orders',
             orders,
@@ -135,7 +131,6 @@ exports.getOrders = (req, res, next) => {
 
 exports.getCheckout = (req, res, next) => {
     res.render('shop/checkout', {
-        isLoggedIn: req.session.isLoggedIn,
         pageTitle: 'Checkout', 
         path: '/shop/checkout', 
         activeCart: true

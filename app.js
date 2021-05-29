@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const MongoDBSession = require('connect-mongodb-session')(session);
+const csrf = require('csurf');
+const flash = require('connect-flash');
 
 const expressHbs = require('express-handlebars');
 const routeErrorCtrl = require('./controllers/route-error');
@@ -17,6 +19,8 @@ const sessionStore = new MongoDBSession({ //we use mongodb to store all sessions
     uri: MONGODB_URI,
     collection: 'sessions',
 });
+
+const csrfProtection = csrf()
 
 app.engine('hbs', expressHbs({
     extname: 'hbs',
@@ -44,6 +48,9 @@ app.use(session({
     store: sessionStore
 }));
 
+app.use(csrfProtection);
+app.use(flash());
+
 app.use((req, res, next) => {
     if(!req.session.user) { return next() }
     User.findById(req.session.user._id).then(user => {
@@ -51,6 +58,13 @@ app.use((req, res, next) => {
         next();
     }).catch(err => console.error(err));
 });
+
+app.use((req, res, next) => {
+    //res.locals are vars that are passed to views which are rendered
+    res.locals.isLoggedIn = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next()
+})
 
 app.use('/admin',adminRoutes); //url filtering all routes that start from /admin will got to this router and inside router we do not need to mention /admin part
 app.use(shopRoutes);
@@ -61,18 +75,6 @@ app.use(routeErrorCtrl.eror404);
 mongoose.connect(MONGODB_URI, { useUnifiedTopology: true })
 .then(result => {
     app.listen(3000, () => {
-        if(User.findOne().then(user => {
-            if(!user) {
-                const user = new User({
-                    name: 'ivgi',
-                    email: 'ivgi@mail.com',
-                    cart: {
-                        items: []
-                    }
-                });
-                user.save();
-            }
-        }));
         console.log('Listening on port 3000');
     }); 
 }).catch(err => console.error('Error connecting DB', err));
