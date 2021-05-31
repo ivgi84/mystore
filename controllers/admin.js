@@ -29,7 +29,13 @@ exports.postAddProduct = (req, res, next) => {
     .save()//this is mongoose method now
     .then(result => {
         res.redirect('/admin/products');
-    }).catch(err => console.error(err)) 
+    }).catch(err => {
+        console.error(err);
+        //res.redirect('/500');
+        const error = new Error(err);//important to create error
+        error.httpStatusCode = 500;
+        return next(error); //in this case all other middlewares will be scipped and move stright to error handling middleware
+    }) 
 
 };
 
@@ -47,7 +53,12 @@ exports.getAllAdminProducts = (req, res, next) => {
             productCSS: true
         })
     })
-    .catch(e => console.error(e));
+    .catch(err => {
+        console.error(err);
+        const error = new Error(err);//important to create error
+        error.httpStatusCode = 500;
+        return next(error); //in this case all other middlewares will be scipped and move stright to error handling middleware
+    })
 
     //use regular way
     //Product.findAll().then(products => {})
@@ -101,7 +112,12 @@ exports.postEditProduct = (req, res, next) => {
             res.redirect('/admin/products');
         })
     })
-    .catch(err => console.error(err))
+    .catch(err => {
+        console.error(err);
+        const error = new Error(err);//important to create error
+        error.httpStatusCode = 500;
+        return next(error); //in this case all other middlewares will be scipped and move stright to error handling middleware
+    })
 };
 
 exports.postDeleteProduct = (req, res, next) => {
@@ -113,6 +129,11 @@ exports.postDeleteProduct = (req, res, next) => {
             console.log('Product Deleted');
         }
     })
-    .catch(err => console.error(err))
+    .catch(err => {
+        console.error(err);
+        const error = new Error(err);//important to create error
+        error.httpStatusCode = 500;
+        return next(error); //in this case all other middlewares will be scipped and move stright to error handling middleware
+    })
     .finally(()=> res.redirect('/admin/products'))
 }

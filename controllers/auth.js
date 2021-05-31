@@ -68,7 +68,11 @@ exports.postSignUp = (req, res, next) => {
         html:'<h1>You signed up to my shop</h1>'
       }).catch(err => console.error(err))
     })
-  .catch(err => console.error(err))
+    .catch(err => {
+      const error = new Error(err);//important to create error
+      error.httpStatusCode = 500;
+      return next(error); //in this case all other middlewares will be scipped and move stright to error handling middleware
+  })
 };
 
 exports.getlogin = (req, res, next) => {
@@ -152,7 +156,11 @@ exports.postLogin = (req, res, next) => {
       }
     })
     .catch(err => { console.error(err); res.redirect('/login')})
-  }).catch(err => console.error(err));
+  }).catch(err => {
+    const error = new Error(err);//important to create error
+    error.httpStatusCode = 500;
+    return next(error); //in this case all other middlewares will be scipped and move stright to error handling middleware
+})
 }
 
 exports.postLogout = (req, res, next) => {
@@ -202,7 +210,11 @@ exports.postResetPassword = (req, res, next) => {
         `
       }).catch(err => console.error(err))
     })
-    .catch(err => console.error(err));
+    .catch(err => {
+      const error = new Error(err);//important to create error
+      error.httpStatusCode = 500;
+      return next(error); //in this case all other middlewares will be scipped and move stright to error handling middleware
+    })
   })
 };
 
@@ -224,7 +236,11 @@ exports.getNewPassword = (req, res, next) => {
       userId:user._id.toString(),
       passwordToken: token
     })
-  }).catch(err => {console.error(err)})
+  }).catch(err => {
+    const error = new Error(err);//important to create error
+    error.httpStatusCode = 500;
+    return next(error); //in this case all other middlewares will be scipped and move stright to error handling middleware
+  })
 };
 
 exports.postNewPassword = (req, res, next) => {
@@ -251,6 +267,10 @@ exports.postNewPassword = (req, res, next) => {
     console.log('Password reset');
     res.redirect('/login');
   })
-  .catch(err => {console.error(err)})
+  .catch(err => {
+    const error = new Error(err);//important to create error
+    error.httpStatusCode = 500;
+    return next(error); //in this case all other middlewares will be scipped and move stright to error handling middleware
+  })
 
 };

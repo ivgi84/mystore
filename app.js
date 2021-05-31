@@ -52,25 +52,45 @@ app.use(csrfProtection);
 app.use(flash()); //messages
 
 app.use((req, res, next) => {
-    if(!req.session.user) { return next() }
-    User.findById(req.session.user._id).then(user => {
-        req.user = user;
-        next();
-    }).catch(err => console.error(err));
-});
-
-app.use((req, res, next) => {
     //res.locals are vars that are passed to views which are rendered
     res.locals.isLoggedIn = req.session.isLoggedIn;
     res.locals.csrfToken = req.csrfToken();
-    next()
+    next();
 })
+
+app.use((req, res, next) => {
+    if(!req.session.user) { return next() }
+    User.findById(req.session.user._id).then(user => {
+        if(!user){
+            return next();
+        }
+        req.user = user;
+        next();
+    }).catch(err => {
+        next(new Error(err))//inside async block we should use next(Error) so error handling middleware will catch it
+        // throw new Error(err); !!inside async block the error handling middlware will not work
+        
+    });
+});
+
 
 app.use('/admin',adminRoutes); //url filtering all routes that start from /admin will got to this router and inside router we do not need to mention /admin part
 app.use(shopRoutes);
 app.use(authRoutes);
 
+
+app.get('/500', routeErrorCtrl.error500);
 app.use(routeErrorCtrl.eror404);
+
+//special error handling middleware that get 4 params. the first param is the error
+//expample in admin controller in createNewProduct
+app.use((error, req, res, next) => { 
+    res.statuus(500).render('500', {
+        pageTitle: 'Error!',
+        path:'/500',
+        isLoggedIn: req.session.isLoggedIn
+    })
+});
 
 mongoose.connect(MONGODB_URI, { useUnifiedTopology: true })
 .then(result => {
