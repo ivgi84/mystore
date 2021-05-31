@@ -20,7 +20,7 @@ const sessionStore = new MongoDBSession({ //we use mongodb to store all sessions
     collection: 'sessions',
 });
 
-const csrfProtection = csrf()
+const csrfProtection = csrf();
 
 app.engine('hbs', expressHbs({
     extname: 'hbs',
@@ -49,7 +49,7 @@ app.use(session({
 }));
 
 app.use(csrfProtection);
-app.use(flash());
+app.use(flash()); //messages
 
 app.use((req, res, next) => {
     if(!req.session.user) { return next() }

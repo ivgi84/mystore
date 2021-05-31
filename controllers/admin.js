@@ -34,12 +34,10 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 exports.getAllAdminProducts = (req, res, next) => {
-
-    Product.find()
-    //.select('title')//allow to select what data should be retreived from the db
-   // .populate('userId','name')// allowes get all data according to property, second param allow to choose what data to get
+    Product.find({userId: req.user._id})
+    // .select('title') //allow to select what data should be retreived from the db
+   // .populate('userId','name') // allowes get all data according to property, second param allow to choose what data to get
     .then(products => {
-        console.log(products);
         res.render('admin/products', {
             pageTitle: 'Admin - All products', 
             prods: products, 
@@ -91,23 +89,30 @@ exports.postEditProduct = (req, res, next) => {
 
     //first we get object from db, then updating it's data and the call save method which is mongoose method now in order to update product
     Product.findById(prodID).then(product => {
+        if(product.userId.toString() !== req.user._id.toString()){
+            return res.redirect('/');
+        }
         product.title = title;
         product.price = price;
         product.description = description
         product.imageUrl = imageUrl;
-        return product.save()
+        return product.save().then(result => {
+            console.log('UPDATED PRODUCT')
+            res.redirect('/admin/products');
+        })
     })
-    .then(result => console.log('UPDATED PRODUCT'))
     .catch(err => console.error(err))
-    .finally(()=> {
-        res.redirect('/admin/products');
-    })
 };
 
 exports.postDeleteProduct = (req, res, next) => {
     const prodId = req.body.productID;
-    Product.findByIdAndRemove(prodId)
-    .then(() => console.log('Product Deleted'))
+    //Product.findByIdAndRemove(prodId)
+    Product.findOneAndDelete({_id: prodId, userId: req.user._id})
+    .then(product => {
+        if(product){
+            console.log('Product Deleted');
+        }
+    })
     .catch(err => console.error(err))
     .finally(()=> res.redirect('/admin/products'))
 }
