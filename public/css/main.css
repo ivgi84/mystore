@@ -241,3 +241,11 @@ form {
     display: none;
   }
 }
+
+/* ERRORS */
+.error-msg{
+  color: red;
+  padding: 10px;
+  background-color:#f9c5c5;
+  border: 1px solid #f90000;
+}

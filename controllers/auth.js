@@ -1,8 +1,9 @@
 const crypto = require('crypto'); //buildin lib to encrypt values
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
-var nodemailer = require('nodemailer');
-var sgTransport = require('nodemailer-sendgrid-transport');
+const nodemailer = require('nodemailer');
+const sgTransport = require('nodemailer-sendgrid-transport');
+const { validationResult } = require('express-validator/check');
 
 var transporterOptions = {
   auth: {
@@ -17,18 +18,39 @@ exports.getSignUp = (req, res, next) => {
     path:'signup',
     activeSignup: true,
     loginCSS: true,
+    oldInput: {
+      email: '', 
+      password:'',
+      repeatPassword: ''
+    },
+    validationErrors:[]
   })
 };
 
 exports.postSignUp = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
-  const repeatPassword = req.body.repeatPassword;
-  User.findOne({email}).then(userData => {
-    if(userData){ 
-      return res.redirect('/signup');
-    }
-    return bcrypt.hash(password, 12) // 12 is the level of encription
+
+  const errors = validationResult(req);
+  if(!errors.isEmpty()){
+    console.log(errors.array());
+    return res.status(422).render('auth/signup', {
+      pageTitle: 'User Sign Up',
+      path:'signup',
+      activeSignup: true,
+      loginCSS: true,
+      errorMessage: errors.array()[0] && errors.array()[0].msg,
+      oldInput: {
+        email, 
+        password,
+        repeatPassword: req.body.repeatPassword
+      },
+      validationErrors: errors.array()
+    })
+  }
+
+  //email validation happens as middleware in route
+  bcrypt.hash(password, 12) // 12 is the level of encription
     .then(hashedPass => {
       const user = new User({
         email,
@@ -46,7 +68,6 @@ exports.postSignUp = (req, res, next) => {
         html:'<h1>You signed up to my shop</h1>'
       }).catch(err => console.error(err))
     })
-  })
   .catch(err => console.error(err))
 };
 
@@ -56,7 +77,12 @@ exports.getlogin = (req, res, next) => {
     path: '/login',
     activeLogin: true,
     loginCSS: true,
-    errorMessage: req.flash('error')
+    errorMessage: req.flash('error'),
+    oldInput: {
+      email: '',
+      password: ''
+    },
+    validationErrors:[]
   })
 };
 
@@ -64,14 +90,45 @@ exports.getlogin = (req, res, next) => {
 exports.postLogin = (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
+
+  //checking errors we might got durtin validation
+  const errors = validationResult(req);
+  if(!errors.isEmpty()) {
+    console.log('Errors in validation');
+    return res.status(422).render('auth/login', {
+      pageTitle: 'User Page', 
+      path: '/login',
+      activeLogin: true,
+      loginCSS: true,
+      errorMessage: errors.array()[0] && errors.array()[0].msg,
+      oldInput: {
+        email,
+        password
+      },
+      validationErrors:[]
+    })
+  }
+
   User.findOne({email}).then(user => {
     if(!user){ 
-      req.flash('error', 'Invalid email or password');
-      return res.redirect('/login');
+      console.log('user not found')
+      return res.status(422).render('auth/login', {
+        pageTitle: 'User Page', 
+        path: '/login',
+        activeLogin: true,
+        loginCSS: true,
+        errorMessage: errors.array()[0] && errors.array()[0].msg,
+        oldInput: {
+          email,
+          password
+        },
+        validationErrors:[]
+      })
     }
     bcrypt.compare(password, user.password)
     .then((match) =>{
       if(match){
+        console.log('Logged In')
         req.session.isLoggedIn = true;
         req.session.user = user; //mogoose object here
         return req.session.save(()=> { //we do save in order to verify that session was created before we redirect to /
@@ -79,7 +136,19 @@ exports.postLogin = (req, res, next) => {
         });
       }
       else{
-        res.redirect('/login');
+        console.log('Password not match')
+        return res.status(422).render('auth/login', {
+          pageTitle: 'User Page', 
+          path: '/login',
+          activeLogin: true,
+          loginCSS: true,
+          errorMessage: errors.array()[0] && errors.array()[0].msg,
+          oldInput: {
+            email,
+            password
+          },
+          validationErrors:[]
+        })
       }
     })
     .catch(err => { console.error(err); res.redirect('/login')})
