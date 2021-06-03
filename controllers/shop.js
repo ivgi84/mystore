@@ -4,11 +4,28 @@ const Product = require('../models/product');
 const Order = require('../models/order');
 const PDFDocument = require('pdfkit');
 
+const ITEMS_PER_PAGE = 2;
+
 
 exports.getIndex = (req, res, next) => {
-    Product.find() //mongoose method
-    .then(products => {
+    const page = +req.query.page || 1;
+    let totalItems;
+    Product.countDocuments().then(numProducts => {
+        totalItems = numProducts;
+        return Product.find() //mongoose method
+        .skip((page - 1) * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE)
+    }).then(products => {
         res.render('shop/index', {
+            pagination:{ //didn't implement it
+                totalItems,
+                currentPage: page,
+                hasNextPage: ITEMS_PER_PAGE * page < totalItems,
+                hasPrevPage: page > 1,
+                nextPage: page + 1,
+                prevPage: page - 1,
+                lastPage: Math.ceil(totalItems / ITEMS_PER_PAGE)
+            },
             pageTitle: 'Shop',
             prods: products,
             path: '/',
