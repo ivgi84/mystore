@@ -1,5 +1,6 @@
 
 const Product = require('../models/product');
+const fileHelper = require('../utils/file.js');
 
 exports.getAddProduct = (req, res, next) => {
 
@@ -14,9 +15,22 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
     const title = req.body.title;
-    const imageUrl = req.body.imageUrl;
+    const image = req.file;
     const price = req.body.price;
     const description = req.body.description;
+
+    if(!image){
+        return res.status(422).res.render('admin/edit-product', {
+            pageTitle: 'Add Product',
+            activeAddProduct: true,
+            productCSS: true,
+            editing: false,
+            actionRoute: '/admin/add-product',
+            errorMessage: 'Attached file is not an image'
+        })
+    }
+
+    const imageUrl = image.path;
 
     const product = new Product({
         title: title, 
@@ -95,7 +109,7 @@ exports.postEditProduct = (req, res, next) => {
     const prodID = req.body.productID;
     const title = req.body.title;
     const price = req.body.price;
-    const imageUrl = req.body.imageUrl;
+    const image = req.file;
     const description = req.body.description;
 
     //first we get object from db, then updating it's data and the call save method which is mongoose method now in order to update product
@@ -106,7 +120,10 @@ exports.postEditProduct = (req, res, next) => {
         product.title = title;
         product.price = price;
         product.description = description
-        product.imageUrl = imageUrl;
+        if(image) {
+            fileHelper.deleteFile(product.imageUrl);
+            product.imageUrl = image.path;
+        }
         return product.save().then(result => {
             console.log('UPDATED PRODUCT')
             res.redirect('/admin/products');
@@ -122,9 +139,14 @@ exports.postEditProduct = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
     const prodId = req.body.productID;
-    //Product.findByIdAndRemove(prodId)
-    Product.findOneAndDelete({_id: prodId, userId: req.user._id})
-    .then(product => {
+    Product.findById(prodId).then(product => {
+        if(!product) {
+            return next(new Error('Delete product-> product not found'));
+        }
+        console.log(product);
+        fileHelper.deleteFile(product.imageUrl);
+        return Product.findOneAndDelete({_id: prodId, userId: req.user._id})
+    }).then(product => {
         if(product){
             console.log('Product Deleted');
         }

@@ -249,3 +249,8 @@ form {
   background-color:#f9c5c5;
   border: 1px solid #f90000;
 }
+
+.error-page{
+  padding:20px;
+  text-align:center;
+}

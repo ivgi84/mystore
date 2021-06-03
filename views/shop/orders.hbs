@@ -4,12 +4,12 @@
           <ul>
             {{#each orders}}
             <li class="order-item card">
-              <p><b>{{ this._id }}</b></p>
+              <p><b>{{ this._id }}</b><a href="/orders/{{../this._id}}">invoice</a></p>
               <ul>
                 {{#each this.products}}
                   <li>
                     <p>Name: <b>{{this.product.title}}</b>  
-                      <span>Quantity: <b>{{this.quantity}}</b></span>
+                      <span>Quantity: <b>{{this.quantity}}</b> </span>
                     </p>
                   </li>
                 {{/each}}

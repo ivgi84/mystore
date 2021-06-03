@@ -21,6 +21,8 @@ router.get('/orders', isAuth, shopCtrl.getOrders);
 
 router.post('/create-order', isAuth, shopCtrl.postOrder);
 
+router.get('/orders/:orderId', isAuth, shopCtrl.getInvoice);
+
 // router.get('/checkout', shopCtrl.getCheckout);
 
 
