@@ -85,6 +85,7 @@ app.use((req, res, next) => {
     //res.locals are vars that are passed to views which are rendered
     res.locals.isLoggedIn = req.session.isLoggedIn;
     res.locals.csrfToken = req.csrfToken();
+    console.log("LOCALS", res.locals);
     next();
 })
 

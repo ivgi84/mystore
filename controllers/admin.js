@@ -137,8 +137,9 @@ exports.postEditProduct = (req, res, next) => {
     })
 };
 
-exports.postDeleteProduct = (req, res, next) => {
-    const prodId = req.body.productID;
+exports.deleteProduct = (req, res, next) => {
+    console.log('deleteProduct', req.params)
+    const prodId = req.params.productID;
     Product.findById(prodId).then(product => {
         if(!product) {
             return next(new Error('Delete product-> product not found'));
@@ -149,13 +150,10 @@ exports.postDeleteProduct = (req, res, next) => {
     }).then(product => {
         if(product){
             console.log('Product Deleted');
+            res.status(200).json({message: 'Success'});
         }
     })
     .catch(err => {
-        console.error(err);
-        const error = new Error(err);//important to create error
-        error.httpStatusCode = 500;
-        return next(error); //in this case all other middlewares will be scipped and move stright to error handling middleware
+        res.status(500).json({message: 'Deleting product failed'});
     })
-    .finally(()=> res.redirect('/admin/products'))
 }
