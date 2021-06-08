@@ -20,4 +20,10 @@ router.get('/posts', feedController.getPosts);
 // POST /feed/post
 router.post('/post', postValidation ,feedController.createPost);
 
+router.get('/post/:postId', feedController.getPost);
+
+router.put('/post/:postId',postValidation, feedController.updatePost);
+
+router.delete('/post/:postId', feedController.deletePost);
+
 module.exports = router;

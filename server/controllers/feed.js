@@ -1,40 +1,46 @@
+
+const fs = require('fs');
+const path = require('path');
 const { validationResult } = require('express-validator'); 
+
 
 const Post = require('../model/post');
 
 
 
 exports.getPosts = (req, res, next) => {
-  res.status(200).json({
-    posts: [{
-      _id: '1',
-      title: 'First Post', 
-      content: 'This is the first post!', 
-      imageUrl:'images/seo.jpg',
-      creator: {
-        name:'Evgeny'
-      },
-      createdAt: new Date()
-    }]
-  });
+  Post.find().then(posts => {
+    res.status(200).json({message: 'Posts fetched', posts});
+  }).catch(err => {
+    if(!err.statusCode){
+      err.statusCode = 500;
+    }
+    next(err);
+  })
 };
 
 exports.createPost = (req, res, next) => {
   const validationErrors = validationResult(req);
 
   if(!validationErrors.isEmpty()) {
-    return res.status(422).json({
-      message: 'Validation error',
-      errors: validationErrors.array()
-    })
+    const error = new Error('Validation error, some field is not valid');
+    error.statusCode = 422;
+    throw error;
+  }
+
+  if(!req.file){
+    const error = new Error('No image provided');
+    error.statusCode = 422;
+    throw error;
   }
   
+  const imageUrl = req.file.path.replace("\\" ,"/"); //TODO: to do the same for udpate post
   const title = req.body.title;
   const content = req.body.content;
   const post = new Post({
     title: title, 
     content: content,
-    imageUrl: 'images/seo.jpg',
+    imageUrl: imageUrl,
     creator:'Evgeny'
   });
 
@@ -45,6 +51,107 @@ exports.createPost = (req, res, next) => {
       post: result
     });
   }).catch(err => {
-    console.error(err);
+    if(!err.statusCode){
+      err.statusCode = 500;
+    }
+    next(err);
   })
 };
+
+exports.getPost = (req, res, next) => {
+  const postId = req.params.postId;
+  Post.findById(postId).then(post => {
+    if(!post){
+      const error = new Error('Could not find post');
+      error.statusCode = 404;
+      throw error;
+    }
+    res.status(200).json({message: 'Post fetched', post});
+  })
+  .catch(err => {
+    if(!err.statusCode){
+      err.statusCode = 500;
+    }
+    next(err);
+  });
+};
+
+exports.updatePost = (req, res, next) => {
+
+  const validationErrors = validationResult(req);
+  if(!validationErrors.isEmpty()) {
+    const error = new Error('Validation error, some field is not valid');
+    error.statusCode = 422;
+    throw error;
+  }
+
+  const postId = req.params.postId;
+  const title = req.body.title;
+  const content = req.body.content;
+  let imageUrl = req.body.image;
+  if(req.file){
+    imageUrl = req.file.path;
+  }
+  if(!imageUrl){
+    const error = new Error('No file selected');
+    error.statusCode = 422;
+    throw error;
+  }
+
+  Post.findById(postId)
+  .then(post => {
+    if(!post){
+      const error = new Error('Could not find post');
+      error.statusCode = 500;
+      throw error;
+    }
+    if(imageUrl !== post.imageUrl){
+      clearImage(post.imageUrl);
+    }
+    post.title = title;
+    post.content = content;
+    post.imageUrl = imageUrl;
+    return post.save();
+  })
+  .then(post =>{
+    res.status(200).json({
+      message: 'Post Updated successfully',
+      post
+    })
+  })
+  .catch(err => {
+    if(!err.statusCode){
+      err.statusCode = 500;
+    }
+    next(err);
+  })
+};
+
+exports.deletePost = (req, res, next) => {
+  const postId = req.params.postId;
+  Post.findById(postId).then(post => {
+    if(!post){
+      const error = new Error('Could not find post');
+      error.statusCode = 404;
+      throw error;
+    }
+    //check loggedIn userId
+    clearImage(post.imageUrl);
+    return Post.findOneAndDelete(postId);
+  })
+  .then(result => {
+    console.log('delete result', result);
+    res.status(200).json({message: 'Post deleted'});
+  })
+  .catch(err => {
+    if(!err.statusCode){
+      err.statusCode = 500;
+    }
+    next(err);
+  })
+};
+
+const clearImage = filePath => {
+  filePath = path.join(__dirname, '..', filePath);
+  fs.unlink(filePath, err => {console.error(err)})
+}
