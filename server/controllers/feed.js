@@ -9,14 +9,26 @@ const Post = require('../model/post');
 
 
 exports.getPosts = (req, res, next) => {
-  Post.find().then(posts => {
-    res.status(200).json({message: 'Posts fetched', posts});
-  }).catch(err => {
-    if(!err.statusCode){
-      err.statusCode = 500;
-    }
-    next(err);
-  })
+  const currentPage = req.query.page || 1;
+  const perPage = 2;
+  let totalItems;
+  Post.find()
+    .countDocuments()
+    .then(count => {
+      totalItems = count;
+      return Post.find()
+        .skip((currentPage -1) * perPage) //how many posts we skip from the beginning
+        .limit(perPage)//how many items to fetch
+    })
+    .then(posts => {
+      res.status(200).json({message: 'Posts fetched', posts, totalItems});
+    })
+    .catch(err => {
+      if(!err.statusCode){
+        err.statusCode = 500;
+      }
+      next(err);
+    })
 };
 
 exports.createPost = (req, res, next) => {
